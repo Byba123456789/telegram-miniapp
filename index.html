@@ -114,11 +114,25 @@ const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-/* ❗ очищаем корзину при старте */
-localStorage.removeItem("cart");
-
 const menu = document.getElementById("menu");
 const cartDiv = document.getElementById("cart");
+
+let cart = [];
+
+/* 🔥 ЖЁСТКИЙ СБРОС СОСТОЯНИЯ */
+function hardReset() {
+  cart = [];
+  update();
+  cartDiv.classList.add("hidden");
+  cartDiv.innerHTML = "";
+}
+
+hardReset();
+
+// если страница восстановилась из кеша (GitHub Pages / моб. браузер)
+window.addEventListener("pageshow", e => {
+  if (e.persisted) hardReset();
+});
 
 const foods = [
  {id:1,name:"Пицца Маргарита",price:450,img:"https://avatars.mds.yandex.net/i?id=f2e936a65ad15cd289abab0c03c9144540793d54-5481525-images-thumbs&n=13"},
@@ -127,9 +141,9 @@ const foods = [
  {id:4,name:"Картофель фри",price:180,img:"https://avatars.mds.yandex.net/i?id=619ea05f2d006710198e7654da95f477da422ad3-4097709-images-thumbs&n=13"}
 ];
 
-let cart = [];
-
-function update(){document.getElementById("count").innerText = cart.length;}
+function update() {
+  document.getElementById("count").innerText = cart.length;
+}
 
 foods.forEach(f=>{
   menu.innerHTML += `
@@ -142,34 +156,64 @@ foods.forEach(f=>{
     </div>`;
 });
 
-function add(f){cart.push(f);update();}
+function add(f){
+  cart.push(f);
+  update();
+}
 
 function openCart(){
-  let total=0;
-  let html="<h2>🛒 Корзина</h2>";
+  let total = 0;
+  let html = "<h2>🛒 Корзина</h2>";
+
+  if (cart.length === 0) {
+    html += "<p>Корзина пуста</p>";
+  }
+
   cart.forEach((i,n)=>{
-    total+=i.price;
-    html+=`<div class="item">${i.name}<span onclick="removeItem(${n})">❌</span></div>`;
+    total += i.price;
+    html += `
+      <div class="item">
+        ${i.name}
+        <span onclick="removeItem(${n})">❌</span>
+      </div>`;
   });
-  html+=`
+
+  html += `
     <b>Итого: ${total} ₽</b>
     <button class="primary-btn" onclick="checkout()">Оформить заказ</button>
-    <button class="secondary-btn" onclick="closeCart()">Назад</button>`;
-  cartDiv.innerHTML=html;
+    <button class="secondary-btn" onclick="clearCart()">Очистить корзину</button>
+    <button class="secondary-btn" onclick="closeCart()">Назад</button>
+  `;
+
+  cartDiv.innerHTML = html;
   cartDiv.classList.remove("hidden");
 }
 
-function removeItem(i){cart.splice(i,1);update();openCart();}
-function closeCart(){cartDiv.classList.add("hidden");}
+function removeItem(i){
+  cart.splice(i,1);
+  update();
+  openCart();
+}
+
+function clearCart(){
+  cart = [];
+  update();
+  openCart();
+}
+
+function closeCart(){
+  cartDiv.classList.add("hidden");
+}
 
 function checkout(){
-  cartDiv.innerHTML=`
+  cartDiv.innerHTML = `
     <h2>📦 Оформление</h2>
     <input id="name" placeholder="Имя">
     <input id="phone" placeholder="Телефон">
     <input id="address" placeholder="Адрес">
     <button class="primary-btn" onclick="send()">Подтвердить</button>
-    <button class="secondary-btn" onclick="closeCart()">Назад</button>`;
+    <button class="secondary-btn" onclick="closeCart()">Назад</button>
+  `;
 }
 
 function send(){
@@ -184,7 +228,7 @@ function send(){
     status: "Принят"
   }));
 
-  cartDiv.innerHTML=`
+  cartDiv.innerHTML = `
     <h2>✅ Спасибо за заказ!</h2>
     <p>Статус: <b>Принят</b></p>
     <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
@@ -192,9 +236,7 @@ function send(){
 }
 
 function backToMenu(){
-  cart=[];
-  update();
-  cartDiv.classList.add("hidden");
+  hardReset();
 }
 </script>
 
