@@ -7,262 +7,443 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body {
-  margin:0;
-  font-family:system-ui,sans-serif;
-  background:#f4f6fb;
-}
+body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb}
+header{padding:16px;font-size:22px;font-weight:700;display:flex;align-items:center;gap:12px}
+.hamburger{font-size:26px;cursor:pointer;user-select:none}
 
-header {
-  padding:16px;
-  font-size:22px;
-  font-weight:700;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:16px}
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.card img{width:100%;height:130px;object-fit:cover}
+.card .info{padding:12px;flex:1}
+.card .name{font-weight:700;margin-bottom:4px}
+.card .price{color:#555;font-size:14px;margin-bottom:10px}
+.card button{width:100%;border:none;background:linear-gradient(135deg,#4f46e5,#6c63ff);color:#fff;padding:10px;border-radius:12px;font-size:14px}
 
-.hamburger {
-  font-size:24px;
-  cursor:pointer;
-}
+.cart-btn{position:fixed;bottom:16px;right:16px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-weight:700;z-index:6;font-size:14px}
+.cart-btn.small{padding:8px 12px;font-size:13px}
 
-.grid {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:14px;
-  padding:16px;
-}
+.panel{position:fixed;inset:0;background:#f4f6fb;padding:16px;overflow-y:auto;z-index:10}
+.hidden{display:none}
 
-.card {
-  background:#fff;
-  border-radius:16px;
-  overflow:hidden;
-  box-shadow:0 10px 24px rgba(0,0,0,.12);
-}
+.primary-btn{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#6c63ff);color:#fff;font-size:16px;margin-top:12px}
+.secondary-btn{width:100%;padding:12px;border-radius:14px;border:1px solid #ccc;background:#fff;margin-top:8px}
 
-.card img {
-  width:100%;
-  height:130px;
-  object-fit:cover;
-}
+.item{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
+.item span.remove{cursor:pointer}
 
-.card .info {
-  padding:12px;
-}
+input,select,textarea{width:100%;padding:12px;margin-bottom:10px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box}
 
-.card button {
-  width:100%;
-  border:none;
-  background:linear-gradient(135deg,#4f46e5,#6c63ff);
-  color:#fff;
-  padding:10px;
-  border-radius:12px;
-}
+.sidebarOverlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:19}
+.sidebar{position:fixed;top:0;left:0;width:260px;height:100%;background:#fff;box-shadow:2px 0 12px rgba(0,0,0,.18);padding:16px;z-index:20;transform:translateX(-110%);transition:transform .2s ease}
+.sidebar.open{transform:translateX(0)}
+.sidebar h3{margin:0 0 12px}
+.sidebar .sbtn{width:100%;padding:12px;border-radius:12px;border:1px solid #e6e6e6;background:#f7f7f7;margin-bottom:10px;font-weight:700;cursor:pointer}
 
-.cart-btn {
-  position:fixed;
-  bottom:16px;
-  right:16px;
-  background:#111;
-  color:#fff;
-  padding:12px 16px;
-  border-radius:999px;
-  z-index:5;
-}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-weight:800;font-size:12px}
 
-.panel {
-  position:fixed;
-  inset:0;
-  background:#f4f6fb;
-  padding:16px;
-  overflow-y:auto;
-  z-index:10;
-}
-
-.hidden {display:none;}
-
-.primary-btn {
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  background:linear-gradient(135deg,#4f46e5,#6c63ff);
-  color:#fff;
-  margin-top:12px;
-}
-
-.secondary-btn {
-  width:100%;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid #ccc;
-  background:#fff;
-  margin-top:8px;
-}
-
-.item {
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
-}
-
-input,select,textarea {
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-/* sidebar */
-.sidebar {
-  position:fixed;
-  top:0;
-  left:0;
-  width:240px;
-  height:100%;
-  background:#fff;
-  box-shadow:2px 0 12px rgba(0,0,0,.15);
-  padding:16px;
-  z-index:20;
-}
-
-.sidebar button {
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:12px;
-  border:none;
-  background:#f0f0f0;
-}
+.stars{display:flex;gap:6px;margin:8px 0 12px}
+.star{font-size:26px;cursor:pointer;user-select:none;filter:drop-shadow(0 1px 0 rgba(0,0,0,.1))}
+.star.off{opacity:.25}
+hr{border:none;border-top:1px solid #e6e6e6;margin:14px 0}
+.smallText{color:#666;font-size:13px}
 </style>
 </head>
 
 <body>
-
 <header>
   <span class="hamburger" onclick="toggleSidebar()">☰</span>
   🍔 Меню
 </header>
 
-<div id="sidebar" class="sidebar hidden">
-  <h3>📂 Меню</h3>
-  <button onclick="showOrders()">📦 Мои заказы</button>
-  <button onclick="showReviews()">⭐ Отзывы</button>
-  <button onclick="openReviewForm()">✍️ Оставить отзыв</button>
-  <button onclick="toggleSidebar()">Закрыть</button>
+<div id="sidebarOverlay" class="sidebarOverlay hidden" onclick="toggleSidebar()"></div>
+<div id="sidebar" class="sidebar">
+  <h3>📂 Разделы</h3>
+  <button class="sbtn" onclick="showOrders(); toggleSidebar()">📦 Мои заказы</button>
+  <button class="sbtn" onclick="showReviews(); toggleSidebar()">⭐ Отзывы</button>
+  <button class="sbtn" onclick="openReviewForm(); toggleSidebar()">✍️ Оставить отзыв</button>
+  <button class="sbtn" onclick="toggleSidebar()">Закрыть</button>
 </div>
 
 <div id="menu" class="grid"></div>
 
-<div class="cart-btn" onclick="openCart()">🛒 (<span id="count">0</span>)</div>
-<div id="cart" class="panel hidden"></div>
+<div id="cartBtn" class="cart-btn small" onclick="openCart()">🛒 Корзина (<span id="count">0</span>)</div>
+<div id="panel" class="panel hidden"></div>
 
 <script>
-Telegram.WebApp.ready();
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
 
-const menu = document.getElementById("menu");
-const cartDiv = document.getElementById("cart");
+const menuEl = document.getElementById("menu");
+const panelEl = document.getElementById("panel");
+const cartBtnEl = document.getElementById("cartBtn");
+
 const sidebar = document.getElementById("sidebar");
-
-let cart = [];
-let orders = JSON.parse(localStorage.getItem("orders")||"[]");
-let reviews = JSON.parse(localStorage.getItem("reviews")||"[]");
-
-const foods = [
- {id:1,name:"Пицца Маргарита",price:450,img:"https://picsum.photos/300/200?1"},
- {id:2,name:"Пицца Пепперони",price:520,img:"https://picsum.photos/300/200?2"},
- {id:3,name:"Бургер с говядиной",price:390,img:"https://picsum.photos/300/200?3"},
- {id:4,name:"Картофель фри",price:180,img:"https://picsum.photos/300/200?4"},
- {id:5,name:"Суши-сет Мини",price:890,img:"https://picsum.photos/300/200?5"},
- {id:6,name:"Ролл Калифорния",price:420,img:"https://picsum.photos/300/200?6"},
- {id:7,name:"Салат Цезарь",price:360,img:"https://picsum.photos/300/200?7"},
- {id:8,name:"Паста с курицей",price:410,img:"https://picsum.photos/300/200?8"},
- {id:9,name:"Морс ягодный",price:120,img:"https://picsum.photos/300/200?9"},
- {id:10,name:"Кола",price:150,img:"https://picsum.photos/300/200?10"}
-];
+const sidebarOverlay = document.getElementById("sidebarOverlay");
 
 function toggleSidebar(){
-  sidebar.classList.toggle("hidden");
+  const isOpen = sidebar.classList.contains("open");
+  if (isOpen){
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.add("hidden");
+  } else {
+    sidebar.classList.add("open");
+    sidebarOverlay.classList.remove("hidden");
+  }
 }
 
-function update(){
+/* ---------- идентификатор пользователя ---------- */
+function getUserKey(){
+  const tgId = tg?.initDataUnsafe?.user?.id;
+  if (tgId) return "tg_" + tgId;
+
+  // если открыто напрямую через ссылку (GitHub Pages) — используем локальный ID
+  let anon = localStorage.getItem("anon_user_id");
+  if (!anon){
+    anon = "anon_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+    localStorage.setItem("anon_user_id", anon);
+  }
+  return anon;
+}
+const USER_KEY = getUserKey();
+
+/* ---------- хранилище ---------- */
+function loadJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  }catch(e){ return fallback; }
+}
+function saveJSON(key, data){
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function userOrdersKey(){ return `orders_${USER_KEY}`; }
+function userReviewKey(){ return `review_${USER_KEY}`; }
+function allReviewsKey(){ return `reviews_all`; }
+
+let orders = loadJSON(userOrdersKey(), []);
+let myReview = loadJSON(userReviewKey(), null);
+let allReviews = loadJSON(allReviewsKey(), []);
+
+/* ---------- товары (ВАШИ картинки) ---------- */
+const foods = [
+ {id:1,name:"Пицца Маргарита",price:450,img:"https://avatars.mds.yandex.net/i?id=f2e936a65ad15cd289abab0c03c9144540793d54-5481525-images-thumbs&n=13"},
+ {id:2,name:"Пицца Пепперони",price:520,img:"https://avatars.mds.yandex.net/i?id=7510b4effb790779ad6b3265c75d1c7b35471084-3986751-images-thumbs&n=13"},
+ {id:3,name:"Бургер с говядиной",price:390,img:"https://avatars.mds.yandex.net/i?id=c9bbef1504a8d0943fecab07d8e57f0a55f40e00-5257529-images-thumbs&n=13"},
+ {id:4,name:"Картофель фри",price:180,img:"https://avatars.mds.yandex.net/i?id=619ea05f2d006710198e7654da95f477da422ad3-4097709-images-thumbs&n=13"},
+ {id:5,name:"Суши-сет Мини",price:890,img:"https://avatars.mds.yandex.net/i?id=317733859dd66a7b9d642cbf51b82fc8a74d81e9-4285597-images-thumbs&n=13"},
+ {id:6,name:"Ролл Калифорния",price:420,img:"https://avatars.mds.yandex.net/i?id=07da68db9d07477d83c2361a6fc7523cea0fb313-4987773-images-thumbs&n=13"},
+ {id:7,name:"Салат Цезарь",price:360,img:"https://avatars.mds.yandex.net/i?id=d5d2672c9ec79214f57d5d7a889f5e8ad6d3562b-5875984-images-thumbs&n=13"},
+ {id:8,name:"Паста с курицей",price:410,img:"https://avatars.mds.yandex.net/i?id=33ecf9434287c2d99114658524cd29b25e6386df-4027955-images-thumbs&n=13"},
+ {id:9,name:"Морс ягодный",price:120,img:"https://avatars.mds.yandex.net/i?id=802f4b2a1808a2a84aeb9436dd5d8e313aa5a942-5231845-images-thumbs&n=13"},
+ {id:10,name:"Кола",price:150,img:"https://avatars.mds.yandex.net/i?id=f8b6d79ad3231eee5ba5b430f44584b18ef64a6d-16971848-images-thumbs&n=13"}
+];
+
+/* ---------- корзина ---------- */
+let cart = [];
+
+function updateCount(){
   document.getElementById("count").innerText = cart.length;
 }
+updateCount();
 
-foods.forEach(f=>{
-  menu.innerHTML+=`
-  <div class="card">
-    <img src="${f.img}">
-    <div class="info">
-      <b>${f.name}</b><br>${f.price} ₽
-      <button onclick='add(${JSON.stringify(f)})'>В корзину</button>
-    </div>
-  </div>`;
-});
-
-function add(f){cart.push(f);update();}
-
-function openCart(){
-  let total=0;
-  let html="<h2>🛒 Корзина</h2>";
-  cart.forEach((i,n)=>{
-    total+=i.price;
-    html+=`<div class="item">${i.name}<span onclick="cart.splice(${n},1);openCart();update()">❌</span></div>`;
+/* ---------- рендер меню ---------- */
+function renderMenu(){
+  menuEl.innerHTML = "";
+  foods.forEach(f=>{
+    menuEl.innerHTML += `
+      <div class="card">
+        <img src="${f.img}" alt="">
+        <div class="info">
+          <div class="name">${f.name}</div>
+          <div class="price">${f.price} ₽</div>
+          <button onclick='addToCart(${JSON.stringify(f)})'>➕ В корзину</button>
+        </div>
+      </div>
+    `;
   });
-  html+=`
-    <b>Итого: ${total} ₽</b>
-    <button class="primary-btn" onclick="checkout()">Оформить заказ</button>
-    <button class="secondary-btn" onclick="closeCart()">Назад</button>`;
-  cartDiv.innerHTML=html;
-  cartDiv.classList.remove("hidden");
+}
+renderMenu();
+
+function addToCart(item){
+  cart.push(item);
+  updateCount();
 }
 
-function closeCart(){cartDiv.classList.add("hidden");}
+/* ---------- панель ---------- */
+function openPanel(html){
+  panelEl.innerHTML = html;
+  panelEl.classList.remove("hidden");
+}
+function closePanel(){
+  panelEl.classList.add("hidden");
+}
 
+/* ---------- корзина UI ---------- */
+function openCart(){
+  let total = 0;
+  let html = `<h2>🛒 Корзина</h2>`;
+
+  if (cart.length === 0){
+    html += `<p class="smallText">Корзина пуста</p>`;
+  }
+
+  cart.forEach((i,n)=>{
+    total += i.price;
+    html += `
+      <div class="item">
+        <div>${i.name}</div>
+        <div>
+          <b>${i.price} ₽</b>
+          &nbsp;&nbsp;<span class="remove" onclick="removeItem(${n})">❌</span>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    <hr>
+    <b>Итого: ${total} ₽</b>
+    <button class="primary-btn" onclick="checkout()">Оформить заказ</button>
+    <button class="secondary-btn" onclick="clearCart()">Очистить корзину</button>
+    <button class="secondary-btn" onclick="closePanel()">Назад</button>
+  `;
+
+  openPanel(html);
+}
+
+function removeItem(i){
+  cart.splice(i,1);
+  updateCount();
+  openCart();
+}
+function clearCart(){
+  cart = [];
+  updateCount();
+  openCart();
+}
+
+/* ---------- оформление ---------- */
 function checkout(){
-  cartDiv.innerHTML=`
+  if (cart.length === 0){
+    openCart();
+    return;
+  }
+
+  openPanel(`
     <h2>📦 Оформление</h2>
     <input id="name" placeholder="Имя">
     <input id="phone" placeholder="Телефон">
-    <input id="address" placeholder="Адрес">
-    <button class="primary-btn" onclick="finishOrder()">Подтвердить</button>`;
+    <input id="street" placeholder="Улица">
+    <input id="house" placeholder="Дом">
+    <select id="pay">
+      <option>Наличные</option>
+      <option>Картой</option>
+    </select>
+    <button class="primary-btn" onclick="finishOrder()">Подтвердить заказ</button>
+    <button class="secondary-btn" onclick="openCart()">Назад в корзину</button>
+  `);
 }
 
 function finishOrder(){
-  orders.push({items:[...cart],date:new Date().toLocaleString()});
-  localStorage.setItem("orders",JSON.stringify(orders));
-  cart=[];
-  update();
-  if(reviews.length===0) openReviewForm();
-  else cartDiv.innerHTML="<h2>✅ Заказ оформлен</h2>";
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const street = document.getElementById("street").value.trim();
+  const house = document.getElementById("house").value.trim();
+  const payment = document.getElementById("pay").value;
+
+  if (!name || !phone || !street || !house){
+    alert("Заполни все поля 😊");
+    return;
+  }
+
+  const total = cart.reduce((s,i)=>s+i.price,0);
+
+  const order = {
+    id: "ORD-" + Math.random().toString(16).slice(2,8).toUpperCase(),
+    created_at: new Date().toLocaleString(),
+    status: "Выполнен", // локально считаем выполненным (без бэка)
+    name,
+    phone,
+    address: `${street}, ${house}`,
+    payment,
+    items: cart,
+    total
+  };
+
+  orders.unshift(order);
+  saveJSON(userOrdersKey(), orders);
+
+  // очищаем корзину
+  cart = [];
+  updateCount();
+
+  // экран спасибо + кнопки
+  openPanel(`
+    <h2>✅ Спасибо за заказ!</h2>
+    <p>Статус: <span class="badge">${order.status}</span></p>
+    <p class="smallText">Номер: <b>${order.id}</b><br>Итого: <b>${order.total} ₽</b></p>
+    <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
+    <button class="secondary-btn" onclick="showOrders()">📦 Мои заказы</button>
+    <button class="secondary-btn" onclick="maybeAskReview()">⭐ Оставить отзыв</button>
+  `);
+
+  // если отзыв ещё не оставляли — “мягко” предложим (не заставляем)
+  // (но ты хотел “запрашивать при выполнении только если не оставлял” — делаем так:)
+  setTimeout(()=>{ maybeAskReview(true); }, 150);
+}
+
+function backToMenu(){
+  closePanel();
+}
+
+/* ---------- отзывы ---------- */
+function maybeAskReview(auto=false){
+  if (myReview) {
+    if (!auto) openReviewForm(); // если нажали кнопку — показать
+    return;
+  }
+  // если авто-приглашение
+  if (auto) openReviewForm();
+  else openReviewForm();
 }
 
 function openReviewForm(){
-  cartDiv.classList.remove("hidden");
-  cartDiv.innerHTML=`
-    <h2>⭐ Отзыв</h2>
-    <textarea id="review" placeholder="Ваш отзыв"></textarea>
-    <button class="primary-btn" onclick="saveReview()">Отправить</button>`;
-}
+  if (myReview){
+    openPanel(`
+      <h2>⭐ Ваш отзыв уже сохранён</h2>
+      <p class="smallText">Спасибо! Можно посмотреть отзывы в меню ☰</p>
+      <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
+      <button class="secondary-btn" onclick="showReviews()">Посмотреть отзывы</button>
+    `);
+    return;
+  }
 
-function saveReview(){
-  reviews.push(document.getElementById("review").value);
-  localStorage.setItem("reviews",JSON.stringify(reviews));
-  cartDiv.innerHTML="<h2>Спасибо за отзыв!</h2>";
+  let current = 0;
+
+  openPanel(`
+    <h2>⭐ Оставьте отзыв</h2>
+    <div class="smallText">Поставьте оценку:</div>
+    <div id="stars" class="stars"></div>
+    <textarea id="reviewText" rows="4" placeholder="Напишите короткий отзыв (необязательно)"></textarea>
+    <button class="primary-btn" id="sendReviewBtn">Отправить</button>
+    <button class="secondary-btn" onclick="backToMenu()">Вернуться в меню</button>
+  `);
+
+  const starsEl = document.getElementById("stars");
+  function renderStars(val){
+    starsEl.innerHTML = "";
+    for (let i=1;i<=5;i++){
+      const s = document.createElement("span");
+      s.className = "star " + (i<=val ? "" : "off");
+      s.textContent = "★";
+      s.onclick = ()=>{ current = i; renderStars(current); };
+      starsEl.appendChild(s);
+    }
+  }
+  renderStars(0);
+
+  document.getElementById("sendReviewBtn").onclick = ()=>{
+    if (current < 1){
+      alert("Поставь от 1 до 5 звёзд 😊");
+      return;
+    }
+    const text = document.getElementById("reviewText").value.trim();
+
+    const review = {
+      user: USER_KEY,
+      stars: current,
+      text,
+      created_at: new Date().toLocaleString()
+    };
+
+    myReview = review;
+    allReviews.push(review);
+
+    saveJSON(userReviewKey(), myReview);
+    saveJSON(allReviewsKey(), allReviews);
+
+    openPanel(`
+      <h2>✅ Спасибо за отзыв!</h2>
+      <p>Оценка: <b>${"★".repeat(review.stars)}${"☆".repeat(5-review.stars)}</b></p>
+      ${review.text ? `<p class="smallText">${escapeHtml(review.text)}</p>` : `<p class="smallText">Без текста</p>`}
+      <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
+      <button class="secondary-btn" onclick="showReviews()">Посмотреть отзывы</button>
+    `);
+  };
 }
 
 function showReviews(){
-  cartDiv.classList.remove("hidden");
-  cartDiv.innerHTML="<h2>⭐ Отзывы</h2>"+reviews.map(r=>`<p>${r}</p>`).join("");
+  allReviews = loadJSON(allReviewsKey(), []);
+  if (!allReviews.length){
+    openPanel(`
+      <h2>⭐ Отзывы</h2>
+      <p class="smallText">Пока отзывов нет.</p>
+      <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
+    `);
+    return;
+  }
+
+  const avg = (allReviews.reduce((s,r)=>s + (r.stars||0), 0) / allReviews.length).toFixed(1);
+
+  let html = `
+    <h2>⭐ Отзывы</h2>
+    <p class="smallText">Средняя оценка: <b>${avg}</b> • Отзывов: <b>${allReviews.length}</b></p>
+    <hr>
+  `;
+
+  allReviews.slice().reverse().forEach(r=>{
+    html += `
+      <div style="background:#fff;border-radius:14px;padding:12px;margin-bottom:10px;box-shadow:0 6px 16px rgba(0,0,0,.08)">
+        <div><b>${"★".repeat(r.stars)}${"☆".repeat(5-r.stars)}</b> <span class="smallText">(${r.created_at})</span></div>
+        <div class="smallText" style="margin-top:6px">${r.text ? escapeHtml(r.text) : "Без текста"}</div>
+      </div>
+    `;
+  });
+
+  html += `
+    <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
+  `;
+  openPanel(html);
 }
 
+/* ---------- мои заказы ---------- */
 function showOrders(){
-  cartDiv.classList.remove("hidden");
-  cartDiv.innerHTML="<h2>📦 Мои заказы</h2>"+orders.map(o=>`<p>${o.date}</p>`).join("");
+  orders = loadJSON(userOrdersKey(), []);
+  if (!orders.length){
+    openPanel(`
+      <h2>📦 Мои заказы</h2>
+      <p class="smallText">Пока заказов нет.</p>
+      <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
+    `);
+    return;
+  }
+
+  let html = `<h2>📦 Мои заказы</h2><hr>`;
+
+  orders.forEach((o, idx)=>{
+    const itemsList = o.items.map(it=>`• ${it.name} — ${it.price} ₽`).join("<br>");
+    html += `
+      <div style="background:#fff;border-radius:14px;padding:12px;margin-bottom:12px;box-shadow:0 6px 16px rgba(0,0,0,.08)">
+        <div class="smallText">${o.created_at} • <b>${o.id}</b></div>
+        <div style="margin-top:6px">Статус: <span class="badge">${o.status}</span></div>
+        <div class="smallText" style="margin-top:6px">${itemsList}</div>
+        <hr>
+        <div><b>Итого: ${o.total} ₽</b></div>
+      </div>
+    `;
+  });
+
+  html += `<button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>`;
+  openPanel(html);
+}
+
+/* ---------- утилиты ---------- */
+function escapeHtml(str){
+  return str.replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
 }
 </script>
-
 </body>
 </html>
