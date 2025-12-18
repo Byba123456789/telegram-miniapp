@@ -140,7 +140,7 @@ input, select {
 <div id="cart" class="panel hidden"></div>
 
 <script>
-const tg = Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
@@ -162,10 +162,16 @@ const foods = [
 
 let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-function save(){localStorage.setItem("cart",JSON.stringify(cart));update();}
-function update(){document.getElementById("count").innerText = cart.length;}
+function save() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  update();
+}
 
-foods.forEach(f=>{
+function update() {
+  document.getElementById("count").innerText = cart.length;
+}
+
+foods.forEach(f => {
   menu.innerHTML += `
     <div class="card">
       <img src="${f.img}">
@@ -177,34 +183,42 @@ foods.forEach(f=>{
     </div>`;
 });
 
-function add(f){cart.push(f);save();}
+function add(f) {
+  cart.push(f);
+  save();
+}
 
-function openCart(){
-  let html="<h2>🛒 Корзина</h2>";
-  let total=0;
-  cart.forEach((i,n)=>{
-    total+=i.price;
-    html+=`<div class="item">${i.name}<span>${i.price} ₽ ❌</span></div>`;
+function openCart() {
+  let html = "<h2>🛒 Корзина</h2>";
+  let total = 0;
+
+  cart.forEach(i => {
+    total += i.price;
+    html += `<div class="item">${i.name}<span>${i.price} ₽</span></div>`;
   });
-  html+=`
+
+  html += `
     <b>Итого: ${total} ₽</b>
     <button class="primary-btn" onclick="checkout()">Оформить заказ</button>
     <button class="secondary-btn" onclick="closeCart()">Назад</button>
   `;
-  cartDiv.innerHTML=html;
+
+  cartDiv.innerHTML = html;
   cartDiv.classList.remove("hidden");
 }
 
-function closeCart(){cartDiv.classList.add("hidden");}
+function closeCart() {
+  cartDiv.classList.add("hidden");
+}
 
-function checkout(){
-  cartDiv.innerHTML=`
+function checkout() {
+  cartDiv.innerHTML = `
     <h2>📦 Оформление</h2>
-    <input id=name placeholder="Имя">
-    <input id=phone placeholder="Телефон">
-    <input id=street placeholder="Улица">
-    <input id=house placeholder="Дом">
-    <select id=pay>
+    <input id="name" placeholder="Имя">
+    <input id="phone" placeholder="Телефон">
+    <input id="street" placeholder="Улица">
+    <input id="house" placeholder="Дом">
+    <select id="pay">
       <option>Наличные</option>
       <option>Картой</option>
     </select>
@@ -213,10 +227,17 @@ function checkout(){
   `;
 }
 
-function send(){
-  tg.sendData(JSON.stringify({items:cart}));
-  localStorage.clear();
-  tg.close();
+function send() {
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const payload = {
+    items: cart,
+    total: total,
+    created_at: Date.now()
+  };
+
+  Telegram.WebApp.sendData(JSON.stringify(payload));
+  Telegram.WebApp.close();
 }
 
 update();
