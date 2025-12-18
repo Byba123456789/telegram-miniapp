@@ -63,17 +63,18 @@ header {
   padding: 14px 18px;
   border-radius: 999px;
   font-weight: 600;
+  z-index: 9999; /* ВАЖНО */
 }
+
 .hidden { display: none; }
 
 .panel {
+  position: fixed;
+  inset: 0;
+  background: #f4f6fb;
   padding: 16px;
-}
-
-.item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  overflow-y: auto;
+  z-index: 10000;
 }
 
 input, select {
@@ -90,7 +91,9 @@ input, select {
 
 <div id="menu" class="grid"></div>
 
-<div class="cart-btn" onclick="openCart()">🛒 Корзина (<span id="count">0</span>)</div>
+<div class="cart-btn" onclick="openCart()">
+  🛒 Корзина (<span id="count">0</span>)
+</div>
 
 <div id="cart" class="panel hidden"></div>
 
@@ -98,6 +101,9 @@ input, select {
 const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
+
+const menu = document.getElementById("menu");
+const cartDiv = document.getElementById("cart");
 
 const foods = [
  {id:1,name:"Пицца",price:450,img:"https://picsum.photos/300/200?1"},
@@ -109,68 +115,90 @@ const foods = [
  {id:7,name:"Лапша",price:380,img:"https://picsum.photos/300/200?7"},
  {id:8,name:"Роллы",price:520,img:"https://picsum.photos/300/200?8"},
  {id:9,name:"Стейк",price:980,img:"https://picsum.photos/300/200?9"},
- {id:10,name:"Морс",price:120,img:"https://picsum.photos/300/200?10"},
- {id:11,name:"Чай",price:90,img:"https://picsum.photos/300/200?11"},
- {id:12,name:"Кофе",price:150,img:"https://picsum.photos/300/200?12"},
- {id:13,name:"Суп",price:260,img:"https://picsum.photos/300/200?13"},
- {id:14,name:"Тако",price:340,img:"https://picsum.photos/300/200?14"},
- {id:15,name:"Десерт",price:210,img:"https://picsum.photos/300/200?15"}
+ {id:10,name:"Морс",price:120,img:"https://picsum.photos/300/200?10"}
 ];
 
-let cart = JSON.parse(localStorage.getItem("cart")||"[]");
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-function save(){localStorage.setItem("cart",JSON.stringify(cart));update();}
-function update(){document.getElementById("count").innerText=cart.length;}
+function save() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  update();
+}
 
-foods.forEach(f=>{
-  menu.innerHTML+=`
-  <div class="card">
-    <img src="${f.img}">
-    <div class="info">
-      <b>${f.name}</b><br>${f.price} ₽
-      <button onclick='add(${JSON.stringify(f)})'>➕ В корзину</button>
-    </div>
-  </div>`;
+function update() {
+  document.getElementById("count").innerText = cart.length;
+}
+
+foods.forEach(f => {
+  menu.innerHTML += `
+    <div class="card">
+      <img src="${f.img}">
+      <div class="info">
+        <b>${f.name}</b><br>${f.price} ₽
+        <button onclick='add(${JSON.stringify(f)})'>➕ В корзину</button>
+      </div>
+    </div>`;
 });
 
-function add(f){cart.push(f);save();}
+function add(f) {
+  cart.push(f);
+  save();
+}
 
-function openCart(){
-  let html="<h2>🛒 Корзина</h2>";
-  let total=0;
-  cart.forEach((i,n)=>{
-    total+=i.price;
-    html+=`${i.name} — ${i.price} ₽ <span onclick="del(${n})">❌</span><br>`;
+function openCart() {
+  let html = "<h2>🛒 Корзина</h2>";
+  let total = 0;
+
+  cart.forEach((i, n) => {
+    total += i.price;
+    html += `
+      ${i.name} — ${i.price} ₽ 
+      <span onclick="del(${n})">❌</span><br>`;
   });
-  html+=`<b>Итого: ${total} ₽</b><br><br>
-  <button onclick="checkout()">Оформить заказ</button>`;
-  cartDiv.innerHTML=html;
+
+  html += `
+    <b>Итого: ${total} ₽</b><br><br>
+    <button onclick="checkout()">Оформить заказ</button>
+    <button onclick="closeCart()">Назад</button>
+  `;
+
+  cartDiv.innerHTML = html;
   cartDiv.classList.remove("hidden");
 }
 
-function del(i){cart.splice(i,1);save();openCart();}
-
-function checkout(){
-  cartDiv.innerHTML=`
-  <h2>📦 Оформление</h2>
-  <input id=name placeholder="Имя">
-  <input id=phone placeholder="Телефон">
-  <input id=street placeholder="Улица">
-  <input id=house placeholder="Дом">
-  <select id=pay>
-    <option>Наличные</option>
-    <option>Картой</option>
-  </select>
-  <button onclick="send()">Подтвердить</button>`;
+function closeCart() {
+  cartDiv.classList.add("hidden");
 }
 
-function send(){
+function del(i) {
+  cart.splice(i, 1);
+  save();
+  openCart();
+}
+
+function checkout() {
+  cartDiv.innerHTML = `
+    <h2>📦 Оформление</h2>
+    <input id="name" placeholder="Имя">
+    <input id="phone" placeholder="Телефон">
+    <input id="street" placeholder="Улица">
+    <input id="house" placeholder="Дом">
+    <select id="pay">
+      <option>Наличные</option>
+      <option>Картой</option>
+    </select>
+    <button onclick="send()">Подтвердить</button>
+    <button onclick="closeCart()">Назад</button>
+  `;
+}
+
+function send() {
   tg.sendData(JSON.stringify({
-    items:cart,
-    name:name.value,
-    phone:phone.value,
-    address:`${street.value}, ${house.value}`,
-    payment:pay.value
+    items: cart,
+    name: name.value,
+    phone: phone.value,
+    address: `${street.value}, ${house.value}`,
+    payment: pay.value
   }));
   localStorage.clear();
   tg.close();
