@@ -235,14 +235,21 @@ function send() {
     total: total,
     name: document.getElementById("name").value,
     phone: document.getElementById("phone").value,
-    address: document.getElementById("street").value + ", " +
-             document.getElementById("house").value,
+    address:
+      document.getElementById("street").value + ", " +
+      document.getElementById("house").value,
     payment: document.getElementById("pay").value
   };
 
   Telegram.WebApp.sendData(JSON.stringify(payload));
+
+  // 🔴 ВАЖНО
+  localStorage.removeItem("cart"); // очищаем корзину
+  cart = [];
+
   Telegram.WebApp.close();
 }
+
 
 
 update();
