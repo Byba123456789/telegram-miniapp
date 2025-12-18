@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Mini App</title>
+  <title>Food Delivery</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,26 +11,56 @@
     body {
       font-family: system-ui, sans-serif;
       background: #f4f6fb;
-      padding: 24px;
+      margin: 0;
+      padding: 16px;
+    }
+
+    h2 {
+      margin-top: 0;
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      max-width: 420px;
-      margin: auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
     button {
+      margin-top: 12px;
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #4f46e5;
       color: white;
-      font-size: 16px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .food {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .remove {
+      color: red;
       cursor: pointer;
     }
   </style>
@@ -38,10 +68,38 @@
 <body>
 
 <div class="card">
-  <h2>Привет 👋</h2>
-  <p>Это Telegram Mini App</p>
+  <h2>Регистрация</h2>
+  <input id="name" placeholder="Ваше имя">
+  <input id="phone" placeholder="Телефон">
+</div>
 
-  <button id="send">Отправить данные</button>
+<div class="card">
+  <h2>Меню</h2>
+  <div id="menu"></div>
+</div>
+
+<div class="card">
+  <h2>Корзина</h2>
+  <div id="cart"></div>
+  <b>Итого: <span id="total">0</span> ₽</b>
+</div>
+
+<div class="card">
+  <h2>Адрес доставки</h2>
+  <input id="street" placeholder="Улица">
+  <input id="house" placeholder="Дом">
+  <input id="flat" placeholder="Квартира">
+</div>
+
+<div class="card">
+  <h2>Оплата</h2>
+  <select id="payment">
+    <option>Наличные</option>
+    <option>Картой курьеру</option>
+    <option>Онлайн (не настоящая)</option>
+  </select>
+
+  <button onclick="checkout()">Оформить заказ</button>
 </div>
 
 <script>
@@ -49,13 +107,88 @@
   tg.ready();
   tg.expand();
 
-  document.getElementById("send").onclick = () => {
-    tg.sendData(JSON.stringify({
-      action: "hello",
-      time: Date.now()
-    }));
+  const foods = [
+    { id: 1, name: "Пицца Маргарита", price: 450 },
+    { id: 2, name: "Пепперони", price: 520 },
+    { id: 3, name: "Бургер", price: 390 },
+    { id: 4, name: "Картофель фри", price: 180 },
+    { id: 5, name: "Суши сет", price: 890 },
+    { id: 6, name: "Ролл Калифорния", price: 420 },
+    { id: 7, name: "Салат Цезарь", price: 360 },
+    { id: 8, name: "Паста", price: 410 },
+    { id: 9, name: "Лапша", price: 380 },
+    { id: 10, name: "Морс", price: 120 }
+  ];
+
+  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+  function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+  }
+
+  function addToCart(food) {
+    cart.push(food);
+    saveCart();
+  }
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    saveCart();
+  }
+
+  function renderMenu() {
+    const menu = document.getElementById("menu");
+    foods.forEach(f => {
+      const div = document.createElement("div");
+      div.className = "food";
+      div.innerHTML = `${f.name} — ${f.price} ₽ 
+        <button onclick='addToCart(${JSON.stringify(f)})'>+</button>`;
+      menu.appendChild(div);
+    });
+  }
+
+  function renderCart() {
+    const cartDiv = document.getElementById("cart");
+    cartDiv.innerHTML = "";
+    let total = 0;
+
+    cart.forEach((item, i) => {
+      total += item.price;
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.innerHTML = `
+        ${item.name} — ${item.price} ₽ 
+        <span class="remove" onclick="removeFromCart(${i})">✖</span>`;
+      cartDiv.appendChild(div);
+    });
+
+    document.getElementById("total").innerText = total;
+  }
+
+  function checkout() {
+    const order = {
+      user: {
+        name: name.value,
+        phone: phone.value
+      },
+      cart,
+      total: document.getElementById("total").innerText,
+      address: {
+        street: street.value,
+        house: house.value,
+        flat: flat.value
+      },
+      payment: payment.value
+    };
+
+    tg.sendData(JSON.stringify(order));
+    localStorage.removeItem("cart");
     tg.close();
-  };
+  }
+
+  renderMenu();
+  renderCart();
 </script>
 
 </body>
