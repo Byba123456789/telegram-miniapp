@@ -32,8 +32,6 @@ header {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(0,0,0,.12);
-  display: flex;
-  flex-direction: column;
 }
 
 .card img {
@@ -44,28 +42,15 @@ header {
 
 .card .info {
   padding: 12px;
-  flex: 1;
-}
-
-.card .name {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.card .price {
-  color: #555;
-  font-size: 14px;
-  margin-bottom: 10px;
 }
 
 .card button {
   width: 100%;
   border: none;
-  background: linear-gradient(135deg, #4f46e5, #6c63ff);
-  color: #fff;
-  padding: 10px;
-  border-radius: 12px;
-  font-size: 14px;
+  background: linear-gradient(135deg,#4f46e5,#6c63ff);
+  color:#fff;
+  padding:10px;
+  border-radius:12px;
 }
 
 .cart-btn {
@@ -76,8 +61,6 @@ header {
   color: #fff;
   padding: 14px 18px;
   border-radius: 999px;
-  font-weight: 600;
-  z-index: 9999;
 }
 
 .panel {
@@ -86,43 +69,34 @@ header {
   background: #f4f6fb;
   padding: 16px;
   overflow-y: auto;
-  z-index: 10000;
+  z-index: 1000;
 }
 
 .hidden { display: none; }
 
 .primary-btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #4f46e5, #6c63ff);
-  color: #fff;
-  font-size: 16px;
-  margin-top: 12px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#4f46e5,#6c63ff);
+  color:#fff;
+  margin-top:12px;
 }
 
 .secondary-btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid #ccc;
-  background: #fff;
-  margin-top: 8px;
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid #ccc;
+  background:#fff;
+  margin-top:8px;
 }
 
 .item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
 }
 </style>
 </head>
@@ -130,19 +104,18 @@ input, select {
 <body>
 
 <header>🍔 Меню</header>
-
 <div id="menu" class="grid"></div>
 
-<div class="cart-btn" onclick="openCart()">
-  🛒 Корзина (<span id="count">0</span>)
-</div>
-
+<div class="cart-btn" onclick="openCart()">🛒 Корзина (<span id="count">0</span>)</div>
 <div id="cart" class="panel hidden"></div>
 
 <script>
-const tg = window.Telegram.WebApp;
+const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
+
+/* ❗ очищаем корзину при старте */
+localStorage.removeItem("cart");
 
 const menu = document.getElementById("menu");
 const cartDiv = document.getElementById("cart");
@@ -151,108 +124,78 @@ const foods = [
  {id:1,name:"Пицца Маргарита",price:450,img:"https://avatars.mds.yandex.net/i?id=f2e936a65ad15cd289abab0c03c9144540793d54-5481525-images-thumbs&n=13"},
  {id:2,name:"Пицца Пепперони",price:520,img:"https://avatars.mds.yandex.net/i?id=7510b4effb790779ad6b3265c75d1c7b35471084-3986751-images-thumbs&n=13"},
  {id:3,name:"Бургер с говядиной",price:390,img:"https://avatars.mds.yandex.net/i?id=c9bbef1504a8d0943fecab07d8e57f0a55f40e00-5257529-images-thumbs&n=13"},
- {id:4,name:"Картофель фри",price:180,img:"https://avatars.mds.yandex.net/i?id=619ea05f2d006710198e7654da95f477da422ad3-4097709-images-thumbs&n=13"},
- {id:5,name:"Суши-сет Мини",price:890,img:"https://avatars.mds.yandex.net/i?id=317733859dd66a7b9d642cbf51b82fc8a74d81e9-4285597-images-thumbs&n=13"},
- {id:6,name:"Ролл Калифорния",price:420,img:"https://avatars.mds.yandex.net/i?id=07da68db9d07477d83c2361a6fc7523cea0fb313-4987773-images-thumbs&n=13"},
- {id:7,name:"Салат Цезарь",price:360,img:"https://avatars.mds.yandex.net/i?id=d5d2672c9ec79214f57d5d7a889f5e8ad6d3562b-5875984-images-thumbs&n=13"},
- {id:8,name:"Паста с курицей",price:410,img:"https://avatars.mds.yandex.net/i?id=33ecf9434287c2d99114658524cd29b25e6386df-4027955-images-thumbs&n=13"},
- {id:9,name:"Морс ягодный",price:120,img:"https://avatars.mds.yandex.net/i?id=802f4b2a1808a2a84aeb9436dd5d8e313aa5a942-5231845-images-thumbs&n=13"},
- {id:10,name:"Кола",price:150,img:"https://avatars.mds.yandex.net/i?id=f8b6d79ad3231eee5ba5b430f44584b18ef64a6d-16971848-images-thumbs&n=13"}
+ {id:4,name:"Картофель фри",price:180,img:"https://avatars.mds.yandex.net/i?id=619ea05f2d006710198e7654da95f477da422ad3-4097709-images-thumbs&n=13"}
 ];
 
-let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let cart = [];
 
-function save() {
-  localStorage.setItem("cart", JSON.stringify(cart));
-  update();
-}
+function update(){document.getElementById("count").innerText = cart.length;}
 
-function update() {
-  document.getElementById("count").innerText = cart.length;
-}
-
-foods.forEach(f => {
+foods.forEach(f=>{
   menu.innerHTML += `
     <div class="card">
       <img src="${f.img}">
       <div class="info">
-        <div class="name">${f.name}</div>
-        <div class="price">${f.price} ₽</div>
-        <button onclick='add(${JSON.stringify(f)})'>➕ В корзину</button>
+        <b>${f.name}</b><br>${f.price} ₽
+        <button onclick='add(${JSON.stringify(f)})'>В корзину</button>
       </div>
     </div>`;
 });
 
-function add(f) {
-  cart.push(f);
-  save();
-}
+function add(f){cart.push(f);update();}
 
-function openCart() {
-  let html = "<h2>🛒 Корзина</h2>";
-  let total = 0;
-
-  cart.forEach(i => {
-    total += i.price;
-    html += `<div class="item">${i.name}<span>${i.price} ₽</span></div>`;
+function openCart(){
+  let total=0;
+  let html="<h2>🛒 Корзина</h2>";
+  cart.forEach((i,n)=>{
+    total+=i.price;
+    html+=`<div class="item">${i.name}<span onclick="removeItem(${n})">❌</span></div>`;
   });
-
-  html += `
+  html+=`
     <b>Итого: ${total} ₽</b>
     <button class="primary-btn" onclick="checkout()">Оформить заказ</button>
-    <button class="secondary-btn" onclick="closeCart()">Назад</button>
-  `;
-
-  cartDiv.innerHTML = html;
+    <button class="secondary-btn" onclick="closeCart()">Назад</button>`;
+  cartDiv.innerHTML=html;
   cartDiv.classList.remove("hidden");
 }
 
-function closeCart() {
-  cartDiv.classList.add("hidden");
-}
+function removeItem(i){cart.splice(i,1);update();openCart();}
+function closeCart(){cartDiv.classList.add("hidden");}
 
-function checkout() {
-  cartDiv.innerHTML = `
+function checkout(){
+  cartDiv.innerHTML=`
     <h2>📦 Оформление</h2>
     <input id="name" placeholder="Имя">
     <input id="phone" placeholder="Телефон">
-    <input id="street" placeholder="Улица">
-    <input id="house" placeholder="Дом">
-    <select id="pay">
-      <option>Наличные</option>
-      <option>Картой</option>
-    </select>
-    <button class="primary-btn" onclick="send()">Подтвердить заказ</button>
-    <button class="secondary-btn" onclick="closeCart()">Назад</button>
+    <input id="address" placeholder="Адрес">
+    <button class="primary-btn" onclick="send()">Подтвердить</button>
+    <button class="secondary-btn" onclick="closeCart()">Назад</button>`;
+}
+
+function send(){
+  const total = cart.reduce((s,i)=>s+i.price,0);
+
+  Telegram.WebApp.sendData(JSON.stringify({
+    items: cart,
+    total,
+    name: name.value,
+    phone: phone.value,
+    address: address.value,
+    status: "Принят"
+  }));
+
+  cartDiv.innerHTML=`
+    <h2>✅ Спасибо за заказ!</h2>
+    <p>Статус: <b>Принят</b></p>
+    <button class="primary-btn" onclick="backToMenu()">Вернуться в меню</button>
   `;
 }
 
-function send() {
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
-
-  const payload = {
-    items: cart,
-    total: total,
-    name: document.getElementById("name").value,
-    phone: document.getElementById("phone").value,
-    address:
-      document.getElementById("street").value + ", " +
-      document.getElementById("house").value,
-    payment: document.getElementById("pay").value
-  };
-
-  Telegram.WebApp.sendData(JSON.stringify(payload));
-
-  // 🔴 ВАЖНО
-  localStorage.removeItem("cart"); // очищаем корзину
-  cart = [];
-
-  Telegram.WebApp.close();
+function backToMenu(){
+  cart=[];
+  update();
+  cartDiv.classList.add("hidden");
 }
-
-
-
-update();
 </script>
 
 </body>
