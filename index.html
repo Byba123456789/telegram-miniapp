@@ -1,194 +1,182 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <title>Food Delivery</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Food Delivery</title>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f4f6fb;
-      margin: 0;
-      padding: 16px;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f4f6fb;
+}
 
-    h2 {
-      margin-top: 0;
-    }
+header {
+  padding: 16px;
+  font-size: 22px;
+  font-weight: 700;
+}
 
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.08);
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
 
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
+.card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0,0,0,.1);
+}
 
-    button {
-      margin-top: 12px;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: #4f46e5;
-      color: white;
-      font-size: 15px;
-      cursor: pointer;
-    }
+.card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
 
-    .food {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
+.card .info {
+  padding: 10px;
+}
 
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
+.card button {
+  width: 100%;
+  border: none;
+  background: #4f46e5;
+  color: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
 
-    .remove {
-      color: red;
-      cursor: pointer;
-    }
-  </style>
+.cart-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  background: #111;
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.hidden { display: none; }
+
+.panel {
+  padding: 16px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="card">
-  <h2>Регистрация</h2>
-  <input id="name" placeholder="Ваше имя">
-  <input id="phone" placeholder="Телефон">
-</div>
+<header>🍔 Меню</header>
 
-<div class="card">
-  <h2>Меню</h2>
-  <div id="menu"></div>
-</div>
+<div id="menu" class="grid"></div>
 
-<div class="card">
-  <h2>Корзина</h2>
-  <div id="cart"></div>
-  <b>Итого: <span id="total">0</span> ₽</b>
-</div>
+<div class="cart-btn" onclick="openCart()">🛒 Корзина (<span id="count">0</span>)</div>
 
-<div class="card">
-  <h2>Адрес доставки</h2>
-  <input id="street" placeholder="Улица">
-  <input id="house" placeholder="Дом">
-  <input id="flat" placeholder="Квартира">
-</div>
-
-<div class="card">
-  <h2>Оплата</h2>
-  <select id="payment">
-    <option>Наличные</option>
-    <option>Картой курьеру</option>
-    <option>Онлайн (не настоящая)</option>
-  </select>
-
-  <button onclick="checkout()">Оформить заказ</button>
-</div>
+<div id="cart" class="panel hidden"></div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
+const tg = Telegram.WebApp;
+tg.ready();
+tg.expand();
 
-  const foods = [
-    { id: 1, name: "Пицца Маргарита", price: 450 },
-    { id: 2, name: "Пепперони", price: 520 },
-    { id: 3, name: "Бургер", price: 390 },
-    { id: 4, name: "Картофель фри", price: 180 },
-    { id: 5, name: "Суши сет", price: 890 },
-    { id: 6, name: "Ролл Калифорния", price: 420 },
-    { id: 7, name: "Салат Цезарь", price: 360 },
-    { id: 8, name: "Паста", price: 410 },
-    { id: 9, name: "Лапша", price: 380 },
-    { id: 10, name: "Морс", price: 120 }
-  ];
+const foods = [
+ {id:1,name:"Пицца",price:450,img:"https://picsum.photos/300/200?1"},
+ {id:2,name:"Бургер",price:390,img:"https://picsum.photos/300/200?2"},
+ {id:3,name:"Суши",price:890,img:"https://picsum.photos/300/200?3"},
+ {id:4,name:"Паста",price:420,img:"https://picsum.photos/300/200?4"},
+ {id:5,name:"Салат",price:320,img:"https://picsum.photos/300/200?5"},
+ {id:6,name:"Фри",price:180,img:"https://picsum.photos/300/200?6"},
+ {id:7,name:"Лапша",price:380,img:"https://picsum.photos/300/200?7"},
+ {id:8,name:"Роллы",price:520,img:"https://picsum.photos/300/200?8"},
+ {id:9,name:"Стейк",price:980,img:"https://picsum.photos/300/200?9"},
+ {id:10,name:"Морс",price:120,img:"https://picsum.photos/300/200?10"},
+ {id:11,name:"Чай",price:90,img:"https://picsum.photos/300/200?11"},
+ {id:12,name:"Кофе",price:150,img:"https://picsum.photos/300/200?12"},
+ {id:13,name:"Суп",price:260,img:"https://picsum.photos/300/200?13"},
+ {id:14,name:"Тако",price:340,img:"https://picsum.photos/300/200?14"},
+ {id:15,name:"Десерт",price:210,img:"https://picsum.photos/300/200?15"}
+];
 
-  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let cart = JSON.parse(localStorage.getItem("cart")||"[]");
 
-  function saveCart() {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    renderCart();
-  }
+function save(){localStorage.setItem("cart",JSON.stringify(cart));update();}
+function update(){document.getElementById("count").innerText=cart.length;}
 
-  function addToCart(food) {
-    cart.push(food);
-    saveCart();
-  }
+foods.forEach(f=>{
+  menu.innerHTML+=`
+  <div class="card">
+    <img src="${f.img}">
+    <div class="info">
+      <b>${f.name}</b><br>${f.price} ₽
+      <button onclick='add(${JSON.stringify(f)})'>➕ В корзину</button>
+    </div>
+  </div>`;
+});
 
-  function removeFromCart(index) {
-    cart.splice(index, 1);
-    saveCart();
-  }
+function add(f){cart.push(f);save();}
 
-  function renderMenu() {
-    const menu = document.getElementById("menu");
-    foods.forEach(f => {
-      const div = document.createElement("div");
-      div.className = "food";
-      div.innerHTML = `${f.name} — ${f.price} ₽ 
-        <button onclick='addToCart(${JSON.stringify(f)})'>+</button>`;
-      menu.appendChild(div);
-    });
-  }
+function openCart(){
+  let html="<h2>🛒 Корзина</h2>";
+  let total=0;
+  cart.forEach((i,n)=>{
+    total+=i.price;
+    html+=`${i.name} — ${i.price} ₽ <span onclick="del(${n})">❌</span><br>`;
+  });
+  html+=`<b>Итого: ${total} ₽</b><br><br>
+  <button onclick="checkout()">Оформить заказ</button>`;
+  cartDiv.innerHTML=html;
+  cartDiv.classList.remove("hidden");
+}
 
-  function renderCart() {
-    const cartDiv = document.getElementById("cart");
-    cartDiv.innerHTML = "";
-    let total = 0;
+function del(i){cart.splice(i,1);save();openCart();}
 
-    cart.forEach((item, i) => {
-      total += item.price;
-      const div = document.createElement("div");
-      div.className = "cart-item";
-      div.innerHTML = `
-        ${item.name} — ${item.price} ₽ 
-        <span class="remove" onclick="removeFromCart(${i})">✖</span>`;
-      cartDiv.appendChild(div);
-    });
+function checkout(){
+  cartDiv.innerHTML=`
+  <h2>📦 Оформление</h2>
+  <input id=name placeholder="Имя">
+  <input id=phone placeholder="Телефон">
+  <input id=street placeholder="Улица">
+  <input id=house placeholder="Дом">
+  <select id=pay>
+    <option>Наличные</option>
+    <option>Картой</option>
+  </select>
+  <button onclick="send()">Подтвердить</button>`;
+}
 
-    document.getElementById("total").innerText = total;
-  }
+function send(){
+  tg.sendData(JSON.stringify({
+    items:cart,
+    name:name.value,
+    phone:phone.value,
+    address:`${street.value}, ${house.value}`,
+    payment:pay.value
+  }));
+  localStorage.clear();
+  tg.close();
+}
 
-  function checkout() {
-    const order = {
-      user: {
-        name: name.value,
-        phone: phone.value
-      },
-      cart,
-      total: document.getElementById("total").innerText,
-      address: {
-        street: street.value,
-        house: house.value,
-        flat: flat.value
-      },
-      payment: payment.value
-    };
-
-    tg.sendData(JSON.stringify(order));
-    localStorage.removeItem("cart");
-    tg.close();
-  }
-
-  renderMenu();
-  renderCart();
+update();
 </script>
 
 </body>
